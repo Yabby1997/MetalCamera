@@ -42,6 +42,7 @@ targets:
           UILaunchScreen:
         CFBundleDevelopmentRegion: $(DEVELOPMENT_LANGUAGE)
         CFBundleShortVersionString: $(MARKETING_VERSION)
+        NSCameraUsageDescription: "카메라 사용을 허용해주세요"
     settings:
       base:
         DEVELOPMENT_TEAM: 5HZQ3M82FA
