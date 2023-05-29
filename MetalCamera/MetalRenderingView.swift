@@ -23,7 +23,7 @@ final class MetalRenderingView: UIView {
     private var textureCache: CVMetalTextureCache?
     private var scaleShader: MPSImageScale?
     private var cancellables: Set<AnyCancellable> = []
-    @Published var pixelBuffer: CVPixelBuffer?
+    private var pixelBuffer: CVPixelBuffer?
 
     // MARK: - Initializers
 
@@ -66,13 +66,13 @@ final class MetalRenderingView: UIView {
         ) == kCVReturnSuccess else {
             return
         }
+    }
 
-        $pixelBuffer
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.metalView.setNeedsDisplay()
-            }
-            .store(in: &cancellables)
+    func process(pixelBuffer: CVPixelBuffer) {
+        self.pixelBuffer = pixelBuffer
+        DispatchQueue.main.async { [weak self] in
+            self?.metalView.setNeedsDisplay()
+        }
     }
 }
 

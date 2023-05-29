@@ -13,6 +13,7 @@ class ViewController: UIViewController {
 
     private let cameraService = CameraService()
     private let metalRenderingView = MetalRenderingView()
+    private let metalService = MetalService(resolution: CGSize(width: 1080, height: 1920))
     private var cancellables: Set<AnyCancellable> = []
 
     override func viewDidLoad() {
@@ -23,10 +24,18 @@ class ViewController: UIViewController {
         }
 
         cameraService.videoOutputPublisher
-            .map { CMSampleBufferGetImageBuffer($0) }
-            .assign(to: \.pixelBuffer, on: metalRenderingView)
+            .sink { [weak self] pixelBuffer in
+                self?.metalService.process(pixelBuffer: pixelBuffer)
+            }
+            .store(in: &cancellables)
+
+        metalService.pixelBufferOutput
+            .sink { [weak self] pixelBuffer in
+                self?.metalRenderingView.process(pixelBuffer: pixelBuffer)
+            }
             .store(in: &cancellables)
 
         cameraService.start(with: .hd1920x1080)
+        metalService.setupMetal()
     }
 }

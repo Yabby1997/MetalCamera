@@ -17,9 +17,8 @@ final class CameraService: NSObject {
 
     // MARK: - Properties
 
-    @Published private var videoOutput: CMSampleBuffer?
-
-    var videoOutputPublisher: AnyPublisher<CMSampleBuffer, Never> {
+    @Published private var videoOutput: CVPixelBuffer?
+    var videoOutputPublisher: AnyPublisher<CVPixelBuffer, Never> {
         $videoOutput.compactMap { $0 }.eraseToAnyPublisher()
     }
 
@@ -34,7 +33,7 @@ final class CameraService: NSObject {
             captureSession.beginConfiguration()
             captureSession.sessionPreset = preset
 
-            guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+            guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front),
                   let videoInput = try? AVCaptureDeviceInput(device: camera),
                   captureSession.canAddInput(videoInput) else { return }
             captureSession.addInput(videoInput)
@@ -81,6 +80,6 @@ extension CameraService: AVCaptureVideoDataOutputSampleBufferDelegate {
         didOutput sampleBuffer: CMSampleBuffer,
         from connection: AVCaptureConnection
     ) {
-        videoOutput = sampleBuffer
+        videoOutput = CMSampleBufferGetImageBuffer(sampleBuffer)
     }
 }
